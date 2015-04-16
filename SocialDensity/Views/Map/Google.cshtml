@@ -43,10 +43,11 @@
             mapTypeId: google.maps.MapTypeId.SATELLITE
         });
 
-        heatmap = new google.maps.visualization.HeatmapLayer({
-            data: heatmapData
-        });
-        heatmap.setMap(map);
+        //heatmap = new google.maps.visualization.HeatmapLayer({
+        //    data: heatmapData,
+        //    radius: 10
+        //});
+        //heatmap.setMap(map);
     }
     $(function () {
         $("#map-canvas").width($(document).width());
@@ -56,7 +57,7 @@
         //divideRectangle("41.308531", "28.604999", "40.788628", "29.461932");
         //divideRectangle(40.788628, 29.461932, 41.308531, 28.604999, 0.1);
         //divideRectangle(40.934883, 29.136390, 41.001377, 29.032363, 0.01);
-
+        divideRectangle(40.963080, 29.073317, 40.981744, 29.042932, 0.01);
     });
 
     function divideRectangle(minLat, minLon, maxLat, maxLon, aperture) {
@@ -128,22 +129,26 @@
                 $.each(data, function (index) {
                     var cCell = $(this);
                     if ($.inArray(new google.maps.LatLng(cCell[0].lat, cCell[0].lon), heatmapData) == -1) {
-                        marker = new google.maps.Marker({
-                            position: new google.maps.LatLng(cCell[0].lat, cCell[0].lon),
-                            map: map
-                        });
-                        //$.ajax({
-                        //    type: "GET",
-                        //    url: "http://opencellid.org/" + "cell/getMeasures" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&cellid=" + cCell[0].cellid + "&mcc=" + cCell[0].mcc + "&mnc=" + cCell[0].mnc + "&lac=" + cCell[0].lac + "&format=json",
-                        //    success: function (data) {
-                        //        cCell[0].measurements = $.grep(data.measurements, function (a) { return a.signal != 0; });
-                        //        heatmapData.push({ location: new google.maps.LatLng(cCell[0].lat, cCell[0].lon), weight: cCell[0].measurements.signal * -1 });
-                        //        debugger;
-                        //    },
-                        //    error: function (error) {
-                        //        debugger;
-                        //    }
+                        //marker = new google.maps.Marker({
+                        //    position: new google.maps.LatLng(cCell[0].lat, cCell[0].lon),
+                        //    map: map
                         //});
+                        $.ajax({
+                            type: "GET",
+                            url: "http://opencellid.org/" + "cell/getMeasures" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&cellid=" + cCell[0].cellid + "&mcc=" + cCell[0].mcc + "&mnc=" + cCell[0].mnc + "&lac=" + cCell[0].lac + "&format=json",
+                            success: function (data) {
+                                //cCell[0].measurements = $.grep(data.measurements, function (a) { return a.signal != 0; });
+                                cCell[0].measurements = data.measurements;
+                                var cSignaldBm = cCell[0].measurements[0].signal;
+                                var networkType = cCell[0].measurements[0].radio;
+                                var cSignalASU = convertDBMToASU(cSignaldBm, networkType);
+                                heatmapData.push({ location: new google.maps.LatLng(cCell[0].lat, cCell[0].lon), weight: cSignalASU });
+                                debugger;
+                            },
+                            error: function (error) {
+                                debugger;
+                            }
+                        });
                     }
                 });
                 //$.each(data, function (index) {
@@ -171,5 +176,48 @@
         });
         //
     }
+
+    function convertDBMToASU(cSignaldBm, networkType) {
+        var cSignalASU;
+        switch (networkType) {
+            case "CDMA":
+                if (parseInt(cSignaldBm) > -75) {
+                    cSignalASU = 16;
+                }
+                else if (parseInt(cSignaldBm) > -82) {
+                    cSignalASU = 8;
+                }
+                else if (parseInt(cSignaldBm) > -90) {
+                    cSignalASU = 4;
+                }
+                else if (parseInt(cSignaldBm) > -95) {
+                    cSignalASU = 2;
+                }
+                else if (parseInt(cSignaldBm) > -100) {
+                    cSignalASU = 1;
+                }
+                else {
+                    cSignalASU = 0;
+                }
+                break;
+            case "GSM":
+                //RSSI [dBm] = (2x ASU) - 113
+                cSignalASU = (cSignaldBm + 113) / 2;
+                break;
+            case "LTE":
+                //RSRP [dBm] = ASU - 140
+                cSignalASU = (cSignaldBm + 140);
+                break;
+            case "UMTS":
+                //RSCP [dBm] = ASU - 116
+                cSignalASU = (cSignaldBm + 116);
+                break;
+            default:
+                cSignalASU = 0;
+                break;
+        }
+        return cSignalASU;
+    }
+
 </script>
 <div id="map-canvas"></div>
