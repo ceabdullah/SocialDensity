@@ -3,6 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>
+<script type="text/javascript" src="~/Scripts/poly2tri.min.js"></script>
 <script type="text/javascript">
     //41.008430, 28.994327
     var heatmapData;
@@ -51,8 +52,42 @@
         $("#map-canvas").width($(document).width());
         $("#map-canvas").height($(document).height());
         initialize();
-        getCellsByCoordinate("41.308531", "28.604999", "40.788628", "29.461932");
+        //getCellsByCoordinate("41.308531", "28.604999", "40.788628", "29.461932");
+        //divideRectangle("41.308531", "28.604999", "40.788628", "29.461932");
+        //divideRectangle(40.788628, 29.461932, 41.308531, 28.604999, 0.1);
+        //divideRectangle(40.934883, 29.136390, 41.001377, 29.032363, 0.01);
+
     });
+
+    function divideRectangle(minLat, minLon, maxLat, maxLon, aperture) {
+        //    var contour = [
+        //new poly2tri.Point(minLat, minLon),
+        // new poly2tri.Point(maxLat, minLon),
+        // new poly2tri.Point(maxLat, maxLon),
+        //new poly2tri.Point(minLat, maxLon)
+        //    ];
+        //    var swctx = new poly2tri.SweepContext(contour);
+        //    swctx.triangulate();
+        //    var triangles = swctx.getTriangles();
+        var coordinates = new Array();
+        var coor = findPointsInPolygon(minLat, minLon, maxLat, maxLon, aperture);
+        for (var i = 0; i < coor.length; i++) {
+            var cCoordinate = coor[i];
+            //coordinates.push({ min: new google.maps.LatLng(minLat, minLon), max: new google.maps.LatLng(cCoordinate.lat(), cCoordinate.lng()) });
+            getCellsByCoordinate(cCoordinate.lat(), cCoordinate.lng(), minLat, minLon);
+        }
+    }
+
+    function findPointsInPolygon(lat, lon, lat2, lon2, aperture) {
+        var coordinates = new Array();
+        for (var i = lat; i <= lat2; i += aperture) {
+            for (var k = lon2; k <= lon; k += aperture) {
+                coordinates.push(new google.maps.LatLng(i, k));
+            }
+        }
+        return coordinates;
+    }
+    var marker;
     function getCellsByCoordinate(minLat, minLon, maxLat, maxLon) {
         //$.ajax({
         //    type: "POST",
@@ -77,7 +112,7 @@
             type: "GET",
             //dataType: "json",
             //contentType: "application/json; charset=utf-8",
-            url: "http://opencellid.org/" + "cell/getInArea" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&BBOX=" + minLat + "," + minLon + "," + maxLat + "," + maxLon + "&format=json&limit=2000",
+            url: "http://opencellid.org/" + "cell/getInArea" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&BBOX=" + minLat + "," + minLon + "," + maxLat + "," + maxLon + "&format=json",
             //data:
             //    '{'
             //    + '"minLat' + '":"' + minLat + '",'
@@ -92,7 +127,24 @@
                 data = data.cells;
                 $.each(data, function (index) {
                     var cCell = $(this);
-                    heatmapData.push(new google.maps.LatLng(cCell[0].lat, cCell[0].lon));
+                    if ($.inArray(new google.maps.LatLng(cCell[0].lat, cCell[0].lon), heatmapData) == -1) {
+                        marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(cCell[0].lat, cCell[0].lon),
+                            map: map
+                        });
+                        //$.ajax({
+                        //    type: "GET",
+                        //    url: "http://opencellid.org/" + "cell/getMeasures" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&cellid=" + cCell[0].cellid + "&mcc=" + cCell[0].mcc + "&mnc=" + cCell[0].mnc + "&lac=" + cCell[0].lac + "&format=json",
+                        //    success: function (data) {
+                        //        cCell[0].measurements = $.grep(data.measurements, function (a) { return a.signal != 0; });
+                        //        heatmapData.push({ location: new google.maps.LatLng(cCell[0].lat, cCell[0].lon), weight: cCell[0].measurements.signal * -1 });
+                        //        debugger;
+                        //    },
+                        //    error: function (error) {
+                        //        debugger;
+                        //    }
+                        //});
+                    }
                 });
                 //$.each(data, function (index) {
                 //    var cCell = $(this);
@@ -112,7 +164,6 @@
                 //        });
                 //    }, 300);
                 //});
-                debugger;
             },
             error: function (error) {
                 debugger;
