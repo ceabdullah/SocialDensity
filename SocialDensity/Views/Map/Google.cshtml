@@ -8,13 +8,14 @@
     var heatmapData;
     var heatmap;
     var map;
+    var centerOfMap;
 
     var styles = [{ "stylers": [{ "hue": "#ff1a00" }, { "invert_lightness": true }, { "saturation": -100 }, { "lightness": 33 }, { "gamma": 0.5 }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#2D333C" }] }];
 
     function initialize() {
         heatmapData = new google.maps.MVCArray();
 
-        var centerOfMap = new google.maps.LatLng(41.008430, 28.994327);
+        centerOfMap = new google.maps.LatLng(41.008430, 28.994327);
 
         map = new google.maps.Map(document.getElementById('map-canvas'), {
             center: centerOfMap,
