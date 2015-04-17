@@ -29,11 +29,10 @@
                     maxZoom: 20,
                     mapTypeId: google.maps.MapTypeId.SATELLITE
                 });
-                //divideRectangle(40.963080, 29.073317, 40.981744, 29.042932, 0.01);
                 divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 3, 0.01);
                 heatmap = new google.maps.visualization.HeatmapLayer({
                     data: heatmapData,
-                    radius: 20
+                    radius: 30
                 });
                 heatmap.setMap(map);
             });
@@ -45,15 +44,6 @@
         $("#map-canvas").height($(document).height());
         initialize();
     });
-
-    //function divideRectangle(minLat, minLon, maxLat, maxLon, aperture) {
-    //    var coordinates = new Array();
-    //    var coor = findPointsInPolygon(minLat, minLon, maxLat, maxLon, aperture);
-    //    for (var i = 0; i < coor.length; i++) {
-    //        var cCoordinate = coor[i];
-    //        getCellsByCoordinate(cCoordinate.lat(), cCoordinate.lng(), minLat, minLon);
-    //    }
-    //}
 
     function divideRectangle(lat, lng, radius, aperture) {
 
