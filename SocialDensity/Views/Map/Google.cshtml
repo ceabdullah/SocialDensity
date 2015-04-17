@@ -5,34 +5,10 @@
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>
 <script type="text/javascript" src="~/Scripts/poly2tri.min.js"></script>
 <script type="text/javascript">
-    //41.008430, 28.994327
     var heatmapData;
     var heatmap;
     var map;
     function initialize() {
-        //var mapOptions = {
-        //    center: { lat: 41.008430, lng: 28.994327 },
-        //    zoom: 11
-        //};
-        //var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-        //       heatmapData = [
-        ////new google.maps.LatLng(37.782, -122.447),
-        ////new google.maps.LatLng(37.782, -122.445),
-        ////new google.maps.LatLng(37.782, -122.443),
-        ////new google.maps.LatLng(37.782, -122.441),
-        ////new google.maps.LatLng(37.782, -122.439),
-        ////new google.maps.LatLng(37.782, -122.437),
-        ////new google.maps.LatLng(37.782, -122.435),
-        ////new google.maps.LatLng(37.785, -122.447),
-        ////new google.maps.LatLng(37.785, -122.445),
-        ////new google.maps.LatLng(37.785, -122.443),
-        ////new google.maps.LatLng(37.785, -122.441),
-        ////new google.maps.LatLng(37.785, -122.439),
-        ////new google.maps.LatLng(37.785, -122.437),
-        ////new google.maps.LatLng(37.785, -122.435)
-        //       ];
-
         heatmapData = new google.maps.MVCArray();
 
         var centerOfMap = new google.maps.LatLng(41.008430, 28.994327);
@@ -51,7 +27,8 @@
                     zoom: 13,
                     mapTypeId: google.maps.MapTypeId.SATELLITE
                 });
-                divideRectangle(40.963080, 29.073317, 40.981744, 29.042932, 0.01);
+                //divideRectangle(40.963080, 29.073317, 40.981744, 29.042932, 0.01);
+                divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 3, 0.01);
                 heatmap = new google.maps.visualization.HeatmapLayer({
                     data: heatmapData,
                     radius: 10
@@ -65,29 +42,31 @@
         $("#map-canvas").width($(document).width());
         $("#map-canvas").height($(document).height());
         initialize();
-        //getCellsByCoordinate("41.308531", "28.604999", "40.788628", "29.461932");
-        //divideRectangle("41.308531", "28.604999", "40.788628", "29.461932");
-        //divideRectangle(40.788628, 29.461932, 41.308531, 28.604999, 0.1);
-        //divideRectangle(40.934883, 29.136390, 41.001377, 29.032363, 0.01);
-        //divideRectangle(40.963080, 29.073317, 40.981744, 29.042932, 0.01);
     });
 
-    function divideRectangle(minLat, minLon, maxLat, maxLon, aperture) {
-        //    var contour = [
-        //new poly2tri.Point(minLat, minLon),
-        // new poly2tri.Point(maxLat, minLon),
-        // new poly2tri.Point(maxLat, maxLon),
-        //new poly2tri.Point(minLat, maxLon)
-        //    ];
-        //    var swctx = new poly2tri.SweepContext(contour);
-        //    swctx.triangulate();
-        //    var triangles = swctx.getTriangles();
+    //function divideRectangle(minLat, minLon, maxLat, maxLon, aperture) {
+    //    var coordinates = new Array();
+    //    var coor = findPointsInPolygon(minLat, minLon, maxLat, maxLon, aperture);
+    //    for (var i = 0; i < coor.length; i++) {
+    //        var cCoordinate = coor[i];
+    //        getCellsByCoordinate(cCoordinate.lat(), cCoordinate.lng(), minLat, minLon);
+    //    }
+    //}
+
+    function divideRectangle(lat, lng, radius, aperture) {
+
+        //CALCULATE RECTANGLE
+        var pointOrigin = new google.maps.LatLng(lat, lng);
+        var radiusInKm = radius;
+        var point1 = pointOrigin.destinationPoint(135, radiusInKm);
+        var point2 = pointOrigin.destinationPoint(320, radiusInKm);
+        //CALCULATE RECTANGLE
+
         var coordinates = new Array();
-        var coor = findPointsInPolygon(minLat, minLon, maxLat, maxLon, aperture);
+        var coor = findPointsInPolygon(point1.lat(), point1.lng(), point2.lat(), point2.lng(), aperture);
         for (var i = 0; i < coor.length; i++) {
             var cCoordinate = coor[i];
-            //coordinates.push({ min: new google.maps.LatLng(minLat, minLon), max: new google.maps.LatLng(cCoordinate.lat(), cCoordinate.lng()) });
-            getCellsByCoordinate(cCoordinate.lat(), cCoordinate.lng(), minLat, minLon);
+            getCellsByCoordinate(cCoordinate.lat(), cCoordinate.lng(), point1.lat(), point1.lng());
         }
     }
 
@@ -102,60 +81,23 @@
     }
     var marker;
     function getCellsByCoordinate(minLat, minLon, maxLat, maxLon) {
-        //$.ajax({
-        //    type: "POST",
-        //    dataType: "json",
-        //    contentType: "application/json; charset=utf-8",
-        //    url: "/CellularData/GetCellsByCoordinate",
-        //    data:
-        //        '{'
-        //        + '"minLat' + '":"' + minLat + '",'
-        //        + '"minLon' + '":"' + minLon + '",'
-        //        + '"maxLat' + '":"' + maxLat + '",'
-        //        + '"maxLon' + '":"' + maxLon
-        //        + '"}',
-        //    success: function (data) {
-        //        debugger;
-        //    },
-        //    error: function (error) {
-        //        debugger;
-        //    }
-        //});
         $.ajax({
             type: "GET",
-            //dataType: "json",
-            //contentType: "application/json; charset=utf-8",
             url: "http://opencellid.org/" + "cell/getInArea" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&BBOX=" + minLat + "," + minLon + "," + maxLat + "," + maxLon + "&format=json",
-            //data:
-            //    '{'
-            //    + '"minLat' + '":"' + minLat + '",'
-            //    + '"minLon' + '":"' + minLon + '",'
-            //    + '"maxLat' + '":"' + maxLat + '",'
-            //    + '"maxLon' + '":"' + maxLon
-            //    + '"}',
             success: function (data) {
-                //data = $.grep(data.cells, function (a) {
-                //    return a.averageSignalStrength != 0;
-                //});
                 data = data.cells;
                 $.each(data, function (index) {
                     var cCell = $(this);
                     if ($.inArray(new google.maps.LatLng(cCell[0].lat, cCell[0].lon), heatmapData) == -1) {
-                        //marker = new google.maps.Marker({
-                        //    position: new google.maps.LatLng(cCell[0].lat, cCell[0].lon),
-                        //    map: map
-                        //});
                         $.ajax({
                             type: "GET",
                             url: "http://opencellid.org/" + "cell/getMeasures" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&cellid=" + cCell[0].cellid + "&mcc=" + cCell[0].mcc + "&mnc=" + cCell[0].mnc + "&lac=" + cCell[0].lac + "&format=json",
                             success: function (data) {
-                                //cCell[0].measurements = $.grep(data.measurements, function (a) { return a.signal != 0; });
                                 cCell[0].measurements = data.measurements;
                                 var cSignaldBm = cCell[0].measurements[0].signal;
                                 var networkType = cCell[0].measurements[0].radio;
                                 var cSignalASU = convertDBMToASU(cSignaldBm, networkType);
                                 heatmapData.push({ location: new google.maps.LatLng(cCell[0].lat, cCell[0].lon), weight: cSignalASU });
-                                debugger;
                             },
                             error: function (error) {
                                 debugger;
@@ -163,24 +105,6 @@
                         });
                     }
                 });
-                //$.each(data, function (index) {
-                //    var cCell = $(this);
-                //    setTimeout(function () {
-                //        $.ajax({
-                //            type: "GET",
-                //            url: "http://opencellid.org/" + "cell/getMeasures" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&cellid=" + cCell[0].cellid + "&mcc=" + cCell[0].mcc + "&mnc=" + cCell[0].mnc + "&lac=" + cCell[0].lac + "&format=json",
-                //            success: function (data) {
-                //                cCell[0].measurements = $.grep(data.measurements, function (a) { return a.signal != 0; });
-                //                heatmapData.push(new google.maps.LatLng(cCell[0].lat, cCell[0].lon));
-
-                //                debugger;
-                //            },
-                //            error: function (error) {
-                //                debugger;
-                //            }
-                //        });
-                //    }, 300);
-                //});
             },
             error: function (error) {
                 debugger;
@@ -230,6 +154,35 @@
         }
         return cSignalASU;
     }
+
+    //CALCULATE POINT BY DISTANCE
+    Number.prototype.toRad = function () {
+        return this * Math.PI / 180;
+    }
+
+    Number.prototype.toDeg = function () {
+        return this * 180 / Math.PI;
+    }
+
+    google.maps.LatLng.prototype.destinationPoint = function (brng, dist) {
+        dist = dist / 6371;
+        brng = brng.toRad();
+
+        var lat1 = this.lat().toRad(), lon1 = this.lng().toRad();
+
+        var lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) +
+                             Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
+
+        var lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) *
+                                     Math.cos(lat1),
+                                     Math.cos(dist) - Math.sin(lat1) *
+                                     Math.sin(lat2));
+
+        if (isNaN(lat2) || isNaN(lon2)) return null;
+
+        return new google.maps.LatLng(lat2.toDeg(), lon2.toDeg());
+    }
+    //CALCULATE POINT BY DISTANCE
 
 </script>
 <div id="map-canvas"></div>
