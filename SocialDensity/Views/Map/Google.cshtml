@@ -24,12 +24,12 @@
                 centerOfMap = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 map = new google.maps.Map(document.getElementById('map-canvas'), {
                     center: centerOfMap,
-                    zoom: 15,
-                    minZoom: 15,
-                    maxZoom: 20,
+                    zoom: 14,
+                    minZoom: 14,
+                    maxZoom: 18,
                     mapTypeId: google.maps.MapTypeId.SATELLITE
                 });
-                divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 3, 0.01);
+                divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 5, 0.01);
                 heatmap = new google.maps.visualization.HeatmapLayer({
                     data: heatmapData,
                     radius: 30
