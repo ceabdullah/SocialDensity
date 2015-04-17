@@ -29,7 +29,7 @@
                     maxZoom: 18,
                     mapTypeId: google.maps.MapTypeId.SATELLITE
                 });
-                divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 4, 0.01);
+                divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 4, 0.02);
                 heatmap = new google.maps.visualization.HeatmapLayer({
                     data: heatmapData,
                     radius: 30
