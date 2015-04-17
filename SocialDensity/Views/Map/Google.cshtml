@@ -15,7 +15,7 @@
 
         map = new google.maps.Map(document.getElementById('map-canvas'), {
             center: centerOfMap,
-            zoom: 13,
+            zoom: 15,
             mapTypeId: google.maps.MapTypeId.SATELLITE
         });
 
@@ -24,14 +24,16 @@
                 centerOfMap = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 map = new google.maps.Map(document.getElementById('map-canvas'), {
                     center: centerOfMap,
-                    zoom: 13,
+                    zoom: 15,
+                    minZoom: 15,
+                    maxZoom: 20,
                     mapTypeId: google.maps.MapTypeId.SATELLITE
                 });
                 //divideRectangle(40.963080, 29.073317, 40.981744, 29.042932, 0.01);
                 divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 3, 0.01);
                 heatmap = new google.maps.visualization.HeatmapLayer({
                     data: heatmapData,
-                    radius: 10
+                    radius: 20
                 });
                 heatmap.setMap(map);
             });
