@@ -29,7 +29,7 @@
                     maxZoom: 18,
                     mapTypeId: google.maps.MapTypeId.SATELLITE
                 });
-                divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 4, 0.02);
+                divideRectangle(centerOfMap.lat(), centerOfMap.lng(), 4, 0.05);
                 heatmap = new google.maps.visualization.HeatmapLayer({
                     data: heatmapData,
                     radius: 30
@@ -66,7 +66,9 @@
         var coordinates = new Array();
         for (var i = lat; i <= lat2; i += aperture) {
             for (var k = lon2; k <= lon; k += aperture) {
-                coordinates.push(new google.maps.LatLng(i, k));
+                if ($.inArray(new google.maps.LatLng(i, k), coordinates) == -1) {
+                    coordinates.push(new google.maps.LatLng(i, k));
+                }
             }
         }
         return coordinates;
@@ -80,29 +82,26 @@
                 data = data.cells;
                 $.each(data, function (index) {
                     var cCell = $(this);
-                    if ($.inArray(new google.maps.LatLng(cCell[0].lat, cCell[0].lon), heatmapData) == -1) {
-                        $.ajax({
-                            type: "GET",
-                            url: "http://opencellid.org/" + "cell/getMeasures" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&cellid=" + cCell[0].cellid + "&mcc=" + cCell[0].mcc + "&mnc=" + cCell[0].mnc + "&lac=" + cCell[0].lac + "&format=json",
-                            success: function (data) {
-                                cCell[0].measurements = data.measurements;
-                                var cSignaldBm = cCell[0].measurements[0].signal;
-                                var networkType = cCell[0].measurements[0].radio;
-                                var cSignalASU = convertDBMToASU(cSignaldBm, networkType);
-                                heatmapData.push({ location: new google.maps.LatLng(cCell[0].lat, cCell[0].lon), weight: cSignalASU });
-                            },
-                            error: function (error) {
-                                debugger;
-                            }
-                        });
-                    }
+                    $.ajax({
+                        type: "GET",
+                        url: "http://opencellid.org/" + "cell/getMeasures" + "?" + "key=" + "acbf74e6-3bfc-4eb7-a753-da6418050a47" + "&cellid=" + cCell[0].cellid + "&mcc=" + cCell[0].mcc + "&mnc=" + cCell[0].mnc + "&lac=" + cCell[0].lac + "&format=json",
+                        success: function (data) {
+                            cCell[0].measurements = data.measurements;
+                            var cSignaldBm = cCell[0].measurements[0].signal;
+                            var networkType = cCell[0].measurements[0].radio;
+                            var cSignalASU = convertDBMToASU(cSignaldBm, networkType);
+                            heatmapData.push({ location: new google.maps.LatLng(cCell[0].lat, cCell[0].lon), weight: cSignalASU });
+                        },
+                        error: function (error) {
+                            debugger;
+                        }
+                    });
                 });
             },
             error: function (error) {
                 debugger;
             }
         });
-        //
     }
 
     function convertDBMToASU(cSignaldBm, networkType) {
