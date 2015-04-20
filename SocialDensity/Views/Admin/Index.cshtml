@@ -1,0 +1,63 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing&sensor=false"></script>
+@*<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>*@
+<script type="text/javascript">
+    var tempOverlay;
+    function initialize() {
+        var mapOptions = {
+            center: new google.maps.LatLng(41.008430, 28.994327),
+            zoom: 8
+        };
+
+        var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+        var drawingManager = new google.maps.drawing.DrawingManager({
+            //drawingMode: google.maps.drawing.OverlayType.MARKER,
+            drawingMode: google.maps.drawing.OverlayType.RECTANGLE,
+            drawingControl: true,
+            drawingControlOptions: {
+                position: google.maps.ControlPosition.TOP_CENTER,
+                drawingModes: [
+                  //google.maps.drawing.OverlayType.MARKER,
+                  //google.maps.drawing.OverlayType.CIRCLE,
+                  //google.maps.drawing.OverlayType.POLYGON,
+                  //google.maps.drawing.OverlayType.POLYLINE,
+                  google.maps.drawing.OverlayType.RECTANGLE
+                ]
+            },
+            markerOptions: {
+                icon: 'images/beachflag.png'
+            },
+            circleOptions: {
+                fillColor: '#ffff00',
+                fillOpacity: 1,
+                strokeWeight: 5,
+                clickable: false,
+                editable: true,
+                zIndex: 1
+            }
+        });
+
+        google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
+            if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
+                //var radius = event.overlay.getRadius();
+                if (tempOverlay != undefined && tempOverlay != null) {
+                    tempOverlay.setMap(null);
+                }
+                tempOverlay = event.overlay;
+            }
+        });
+
+        drawingManager.setMap(map);
+    }
+    $(function () {
+        $("#map-canvas").width($(document).width());
+        $("#map-canvas").height($(document).height());
+        initialize();
+    });
+</script>
+<div id="map-canvas"></div>
+
