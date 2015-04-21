@@ -54,10 +54,20 @@
         drawingManager.setMap(map);
     }
     $(function () {
-        $("#map-canvas").width($(document).width());
+        $("#map-canvas").width("100%");
         $("#map-canvas").height($(document).height());
         initialize();
     });
 </script>
-<div id="map-canvas"></div>
+<nav>
+    <div class="nav-wrapper">
 
+        @*<a href="#" class="brand-logo">Logo</a>*@
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+            <li><a href="#">Save</a></li>
+            @*<li><a href="components.html">Components</a></li>
+                <li><a href="javascript.html">JavaScript</a></li>*@
+        </ul>
+    </div>
+</nav>
+<div id="map-canvas"></div>
