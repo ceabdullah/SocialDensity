@@ -15,7 +15,7 @@
 
         var drawingManager = new google.maps.drawing.DrawingManager({
             //drawingMode: google.maps.drawing.OverlayType.MARKER,
-            drawingMode: google.maps.drawing.OverlayType.MARKER,
+            //drawingMode: google.maps.drawing.OverlayType.MARKER,
             drawingControl: true,
             drawingControlOptions: {
                 position: google.maps.ControlPosition.TOP_CENTER,
@@ -33,6 +33,7 @@
                 strokeWeight: 5,
                 clickable: true,
                 editable: true,
+                draggable: true,
                 zIndex: 1
             }
         });
@@ -44,9 +45,26 @@
                     tempOverlay.setMap(null);
                 }
                 tempOverlay = event.overlay;
+
+                var northEast = tempOverlay.getBounds().getNorthEast();
+                var southWest = tempOverlay.getBounds().getSouthWest();
+
+                $("#choosenCoordinate1").html("<span style='color:#006600;'>" + northEast.lat() + "</span>,<span style='color:#669900;'>" + northEast.lng() + "</span>");
+                $("#choosenCoordinate2").html("<span style='color:#800000;'>" + southWest.lat() + "</span>,<span style='color:#FF0000;'>" + southWest.lng() + "</span>");
+
                 google.maps.event.addListener(tempOverlay, 'rightclick', function (event) {
                     tempOverlay.setMap(null);
                     tempOverlay = null;
+                    $("#choosenCoordinate1").html("");
+                    $("#choosenCoordinate2").html("");
+                });
+
+                google.maps.event.addListener(tempOverlay, 'bounds_changed', function (event) {
+                    //tempOverlay = event.overlay;
+                    var northEast = $(this)[0].getBounds().getNorthEast();
+                    var southWest = $(this)[0].getBounds().getSouthWest();
+                    $("#choosenCoordinate1").html("<span style='color:#006600;'>" + northEast.lat() + "</span>,<span style='color:#669900;'>" + northEast.lng() + "</span>");
+                    $("#choosenCoordinate2").html("<span style='color:#800000;'>" + southWest.lat() + "</span>,<span style='color:#FF0000;'>" + southWest.lng() + "</span>");
                 });
             }
         });
@@ -62,9 +80,9 @@
 <nav>
     <div class="nav-wrapper">
 
-        @*<a href="#" class="brand-logo">Logo</a>*@
+        <a href="#" class="brand-logo center"><span id="choosenCoordinate1"></span><span>-</span><span id="choosenCoordinate2"></span></a>
         <ul id="nav-mobile" class="left hide-on-med-and-down">
-            <li><a href="#">Save</a></li>
+            <li><a class="waves-effect waves-light btn center" href="#">Save</a></li>
             @*<li><a href="components.html">Components</a></li>
                 <li><a href="javascript.html">JavaScript</a></li>*@
         </ul>
