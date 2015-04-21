@@ -3,7 +3,6 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing&sensor=false"></script>
-@*<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&sensor=false"></script>*@
 <script type="text/javascript">
     var tempOverlay;
     function initialize() {
@@ -16,8 +15,8 @@
 
         var drawingManager = new google.maps.drawing.DrawingManager({
             //drawingMode: google.maps.drawing.OverlayType.MARKER,
-            drawingMode: google.maps.drawing.OverlayType.RECTANGLE,
-            //drawingControl: true,
+            drawingMode: google.maps.drawing.OverlayType.MARKER,
+            drawingControl: true,
             drawingControlOptions: {
                 position: google.maps.ControlPosition.TOP_CENTER,
                 drawingModes: [
@@ -28,14 +27,11 @@
                   google.maps.drawing.OverlayType.RECTANGLE
                 ]
             },
-            markerOptions: {
-                icon: 'images/beachflag.png'
-            },
-            circleOptions: {
+            rectangleOptions: {
                 fillColor: '#ffff00',
-                fillOpacity: 1,
+                fillOpacity: 0.1,
                 strokeWeight: 5,
-                clickable: false,
+                clickable: true,
                 editable: true,
                 zIndex: 1
             }
@@ -48,6 +44,10 @@
                     tempOverlay.setMap(null);
                 }
                 tempOverlay = event.overlay;
+                google.maps.event.addListener(tempOverlay, 'rightclick', function (event) {
+                    tempOverlay.setMap(null);
+                    tempOverlay = null;
+                });
             }
         });
 
