@@ -5,6 +5,8 @@
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=drawing&sensor=false"></script>
 <script type="text/javascript">
     var tempOverlay;
+    var northEast;
+    var southWest;
     function initialize() {
         var mapOptions = {
             center: new google.maps.LatLng(41.008430, 28.994327),
@@ -14,16 +16,10 @@
         var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
         var drawingManager = new google.maps.drawing.DrawingManager({
-            //drawingMode: google.maps.drawing.OverlayType.MARKER,
-            //drawingMode: google.maps.drawing.OverlayType.MARKER,
             drawingControl: true,
             drawingControlOptions: {
                 position: google.maps.ControlPosition.TOP_CENTER,
                 drawingModes: [
-                  //google.maps.drawing.OverlayType.MARKER,
-                  //google.maps.drawing.OverlayType.CIRCLE,
-                  //google.maps.drawing.OverlayType.POLYGON,
-                  //google.maps.drawing.OverlayType.POLYLINE,
                   google.maps.drawing.OverlayType.RECTANGLE
                 ]
             },
@@ -40,15 +36,13 @@
 
         google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
             if (event.type == google.maps.drawing.OverlayType.RECTANGLE) {
-                //var radius = event.overlay.getRadius();
                 if (tempOverlay != undefined && tempOverlay != null) {
                     tempOverlay.setMap(null);
                 }
                 tempOverlay = event.overlay;
 
-                var northEast = tempOverlay.getBounds().getNorthEast();
-                var southWest = tempOverlay.getBounds().getSouthWest();
-
+                northEast = tempOverlay.getBounds().getNorthEast();
+                southWest = tempOverlay.getBounds().getSouthWest();
                 $("#choosenCoordinate1").html("<span style='color:#006600;'>" + northEast.lat() + "</span>,<span style='color:#669900;'>" + northEast.lng() + "</span>");
                 $("#choosenCoordinate2").html("<span style='color:#800000;'>" + southWest.lat() + "</span>,<span style='color:#FF0000;'>" + southWest.lng() + "</span>");
 
@@ -60,9 +54,8 @@
                 });
 
                 google.maps.event.addListener(tempOverlay, 'bounds_changed', function (event) {
-                    //tempOverlay = event.overlay;
-                    var northEast = $(this)[0].getBounds().getNorthEast();
-                    var southWest = $(this)[0].getBounds().getSouthWest();
+                    northEast = $(this)[0].getBounds().getNorthEast();
+                    southWest = $(this)[0].getBounds().getSouthWest();
                     $("#choosenCoordinate1").html("<span style='color:#006600;'>" + northEast.lat() + "</span>,<span style='color:#669900;'>" + northEast.lng() + "</span>");
                     $("#choosenCoordinate2").html("<span style='color:#800000;'>" + southWest.lat() + "</span>,<span style='color:#FF0000;'>" + southWest.lng() + "</span>");
                 });
